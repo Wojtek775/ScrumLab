@@ -1,0 +1,112 @@
+{% extends "__base__.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+    <div class="dashboard-content border-dashed p-3 m-4 view-height">
+        <div class="row border-bottom border-3 p-1 m-1">
+            <div class="col noPadding"><h3 class="color-header text-uppercase">Lista
+                Przepisów</h3></div>
+            <div class="col noPadding">
+                <form method="GET" action="{% url 'search' %}">
+                    <input list="recipes" class="mr-2 pt-0 pb-2 pr-4 pl-1" placeholder="Szukaj przepisu..." name="recipes">
+                    <datalist id="recipes">
+                        {% for recipe in all %}
+                            <option value="{{ recipe }}">
+                        {% endfor %}
+                        {% if exist %}
+                            <div id="exist" title="Integrity alert">
+                            <script>if(confirm("Nie ma takiego przepisu...")){
+                                window.location = '/recipes/list/';
+                            }
+                            else
+                            {
+                                window.location = '/recipes/list/';
+                            }
+                            </script>
+                            </div>
+                        {% endif %}
+                    </datalist>
+                </form>
+            </div>
+            <div class="col noPadding d-flex justify-content-end mb-2">
+                <a href="/plan/add-recipe/"
+                   class="btn btn-info mr-1 rounded-0 pt-0 pb-0 pr-4 pl-4">Dodaj przepis do planu</a>
+                <a href="/recipe/add/"
+                    class="btn btn-success rounded-0 pt-0 pb-0 pr-4 pl-4">Dodaj przepis</a></div>
+        </div>
+        <table class="table border-bottom schedules-content">
+            <thead>
+            <tr class="d-flex text-color-darker">
+                <th scope="col" class="col-1">ID</th>
+                <th scope="col" class="col-2">NAZWA</th>
+                <th scope="col" class="col-7">OPIS</th>
+                <th scope="col" class="col-2 center">AKCJE</th>
+            </tr>
+            </thead>
+            {% for recipe in recipes.object_list %}
+                <tbody class="text-color-lighter">
+                <tr class="d-flex">
+                    <th scope="row" class="col-1">{{ recipe.id }}</th>
+                    <td class="col-2">
+                        {{ recipe.name }}
+                        <p><i class="fas fa-thumbs-up"></i> {{ recipe.votes }} </p>
+                    </td>
+                    <td class="col-7">{{ recipe.description }}
+                    </td>
+                    <td class="col-2 d-flex align-items-center justify-content-center flex-wrap">
+                        <form method="POST" onsubmit="return confirm('Czy na pewno usunąć przepis {{ recipe.name }}?')">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ recipe.id }}" name="name">
+                            <button class="btn btn-danger rounded-0 text-light m-1">Usuń</button>
+                        </form>
+                        <a href="/recipe/{{recipe.id }}"
+                           class="btn btn-info rounded-0 text-light m-1">Szczegóły</a>
+                        <a href="{{ recipe.recipe_modify_url }}"
+                           class="btn btn-warning rounded-0 text-light m-1">Edytuj</a>
+                    </td>
+                </tr>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <ul class="pagination">
+            {% if recipes.has_previous %}
+                <li>
+                    <a href="?page={{ recipes.previous_page_number }}"><i class="fa fa-chevron-left"
+                                                                          aria-hidden="true"></i>&nbsp poprzednia &nbsp</a>
+                </li>
+            {% else %}
+                <li class="disabled"><span><i class="" aria-hidden="true"></i></span></li>
+            {% endif %}
+            {% if recipes.number|add:'-4' > 1 %}
+                <li>
+                    <a href="?page={{ recipes.number|add:'-5' }}"> &hellip;</a>
+                </li>
+            {% endif %}
+
+            {% for i in recipes.paginator.page_range %}
+                {% if recipes.number == i %}
+                    <li class="active"><span>|&nbsp{{ i }}&nbsp|<span class="sr-only">(current)</span></span></li>
+                {% elif i > recipes.number|add:'-5' and i < recipes.number|add:'5' %}
+                    <li>
+                        <a href="?page={{ i }}">&nbsp{{ i }}&nbsp</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if recipes.paginator.num_pages > recipes.number|add:'4' %}
+                <li>
+                    <a href="?page={{ recipes.number|add:'5' }}"> &hellip;</a>
+                </li>
+            {% endif %}
+
+            {% if recipes.has_next %}
+                <li>
+                    <a href="?page={{ recipes.next_page_number }}">&nbsp następna &nbsp<i class="fa fa-chevron-right"
+                                                                              aria-hidden="true"></i></a>
+                </li>
+            {% else %}
+                <li class="disabled"><span><i class="fa" aria-hidden="true"></i></span></li>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock content %}

@@ -1,0 +1,104 @@
+{% extends "__base__.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<style>
+table {
+    table-layout: fixed;
+    border-spacing: 0px;
+    margin-right: auto;
+    margin-left: auto;
+}
+td {
+    word-wrap: break-word;
+}
+</style>
+<div class="dashboard-content border-dashed p-3 m-4 view-height">
+
+    <div class="row border-bottom border-3 p-1 m-1">
+        <div class="col noPadding">
+            <h3 class="color-header text-uppercase">LISTA PLANÓW</h3>
+        </div>
+        <div class="col d-flex justify-content-end mb-2 noPadding">
+            <a href="/plan/add-recipe/" class="btn btn-info mr-1 rounded-0 pt-0 pb-0 pr-4 pl-4">Dodaj przepis do planu</a>
+            <a href="/plan/add/"
+               class="btn btn-success rounded-0 pt-0 pb-0 pr-4 pl-4">Dodaj
+                plan</a>
+        </div>
+    </div>
+
+    <div class="schedules-content">
+        <table class="table border-bottom">
+            <thead>
+            <tr class="d-flex">
+                <th class="col-1">ID</th>
+                <th class="col-2">NAZWA</th>
+                <th class="col-7">OPIS</th>
+                <th class="col-2 center">AKCJE</th>
+            </tr>
+            </thead>
+            {% for plan in ord_schedules %}
+            <tbody class="text-color-lighter">
+            <tr class="d-flex">
+                <td class="col-1">{{ plan.id }}</td>
+                <td class="col-2">{{ plan.name }}</td>
+                <td class="col-7">
+                    {{ plan.description }}
+                </td>
+                <td class="col-2 d-flex align-items-center justify-content-center flex-wrap">
+                    <form method="POST" onsubmit="return confirm('Czy na pewno usunąć plan {{ plan.name }}?')">
+                    {% csrf_token %}
+                        <input type="hidden" value="{{ plan.id }}" name="plan_name">
+                        <button class="btn btn-danger rounded-0 text-light m-1">Usuń</button>
+                    </form>
+                    <a href="/plan/{{ plan.id }}/details/"
+                       class="btn btn-info rounded-0 text-light m-1">Szczegóły</a>
+                    <a href="/plan/{{ plan.id }}/modify/"
+                       class="btn btn-warning rounded-0 text-light m-1">Edytuj</a>
+                </td>
+            {% endfor %}
+            </tr>
+            </tbody>
+        </table>
+        <ul class="pagination">
+            {% if ord_schedules.has_previous %}
+                <li>
+                    <a href="?page={{ ord_schedules.previous_page_number }}"><i class="fa fa-chevron-left"
+                                                                          aria-hidden="true"></i>&nbsp poprzednia &nbsp</a>
+                </li>
+            {% else %}
+                <li class="disabled"><span><i class="" aria-hidden="true"></i></span></li>
+            {% endif %}
+            {% if ord_schedules.number|add:'-4' > 1 %}
+                <li>
+                    <a href="?page={{ ord_schedules.number|add:'-5' }}"> &hellip;</a>
+                </li>
+            {% endif %}
+
+            {% for i in ord_schedules.paginator.page_range %}
+                {% if ord_schedules.number == i %}
+                    <li class="active"><span>|&nbsp{{ i }}&nbsp|<span class="sr-only">(current)</span></span></li>
+                {% elif i > ord_schedules.number|add:'-5' and i < ord_schedules.number|add:'5' %}
+                    <li>
+                        <a href="?page={{ i }}">&nbsp{{ i }}&nbsp</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if ord_schedules.paginator.num_pages > ord_schedules.number|add:'4' %}
+                <li>
+                    <a href="?page={{ ord_schedules.number|add:'5' }}"> &hellip;</a>
+                </li>
+            {% endif %}
+
+            {% if ord_schedules.has_next %}
+                <li>
+                    <a href="?page={{ ord_schedules.next_page_number }}">&nbsp następna &nbsp<i class="fa fa-chevron-right"
+                                                                              aria-hidden="true"></i></a>
+                </li>
+            {% else %}
+                <li class="disabled"><span><i class="fa" aria-hidden="true"></i></span></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock content %}
